@@ -1,0 +1,23 @@
+##this is osmosos replication configuration file
+
+# The URL of the directory containing change files.
+baseUrl=http://planet.openstreetmap.org/replication/hour/
+
+# Defines the maximum time interval in seconds to download in a single invocation.
+# Setting to 0 disables this feature.
+#maxInterval = 0
+#86400 = 1 dan
+maxInterval = 86400
+#172800 = 2 dana
+#maxInterval = 172800
+#259200 = 3 dana
+#maxInterval = 259200
+#345600 = 4 dana
+#maxInterval = 345600
+#432000 = 5 dana
+#maxInterval = 432000
+#518400 = 6 dana
+#maxInterval = 518400
+#604800 = 7 dana
+#maxInterval = 604800
+

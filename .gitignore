@@ -1,0 +1,16 @@
+# europe backup
+europe/
+
+#bin files
+bin/
+
+#cache files
+cache/
+
+#data files
+data/
+
+state.txt
+croatia-stats.csv
+osmand.log*
+replex.log
