@@ -12,6 +12,6 @@ mkdir $REPLEX/data
 mkdir $REPLEX/europe
 
 wget http://data.osm-hr.org/osm/europe-east.osm.pbf -O $REPLEX/europe/europe-east.osm.pbf
-wget http://data.osm-hr.org/osm/state.txt -O -O $REPLEX/state.txt
+wget http://data.osm-hr.org/osm/state.txt -O $REPLEX/state.txt
 
 #after initial setup run update to get binaries
