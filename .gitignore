@@ -10,6 +10,9 @@ cache/
 #data files
 data/
 
+#stats files
+stats/
+
 state.txt
 croatia-stats.csv
 osmand.log*
