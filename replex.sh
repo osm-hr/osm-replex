@@ -388,7 +388,7 @@ if [ $hour -eq 00 ]
       
       while read <&3 -r LINE
       do
-        echo "$LINE" | awk -v Node=$TOTAL_NODE -v Way=$TOTAL_WAY -v Relation=$TOTAL_RELATION -F "." '{printf "<tr><td><a href=\"http://osm. org/user/%s\">%s</a>: <a href=\"http://hdyc.neis-one.org/?%s\">h</a>, <a href=\"http://yosmhm.neis-one.org/?%s\">y</a></td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td></tr> \n",$1,$1,$1,$1,$2,100*($2)/Node,$3,100*($3)/Way,$4,100*($4)/Relation,$5;}' >>$statistike
+        echo "$LINE" | awk -v Node=$TOTAL_NODE -v Way=$TOTAL_WAY -v Relation=$TOTAL_RELATION -F "." '{printf "<tr><td><a href=\"http://osm.org/user/%s\">%s</a>: <a href=\"http://hdyc.neis-one.org/?%s\">h</a>, <a href=\"http://yosmhm.neis-one.org/?%s\">y</a></td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td></tr> \n",$1,$1,$1,$1,$2,100*($2)/Node,$3,100*($3)/Way,$4,100*($4)/Relation,$5;}' >>$statistike
     
       done
       exec 3>&-
