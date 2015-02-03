@@ -241,6 +241,7 @@ if [ $hour -eq 00 ]
   echo "Kraj OsmAnd-a u: "`date +%Y%m%d-%H%M%S` >> $LOG
 fi
 
+rm $CACHE/*
 
 ############################
 ## Statistike za hrvatsku ##
@@ -287,15 +288,20 @@ if [ $hour -eq 00 ]
   done
   exec 3>&-
 
+  #country total stats
+  echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/croatia-total.csv
+
   #sortiranje sa zarezom
   #sort -t, -k2,2nr $korstat1 >$korstat2
   #sortiranje sa tockom i zamjenom u zarez
   #  sort -t "." -k 2nr $korstat1 | tr "." "," >$korstat2 
   sort -f -t "." -k 2nr $korstat1 >$korstat2
-  
-  #zapisuje statitiske za drzavu
-  echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/croatia-stats.csv
-  
+
+  #country user stats.csv to web folder
+  echo 'user,nodes,ways,relations,lastedit' >$WEB/statistike/croatia-users.csv
+  cat $korstat2 | tr "." "," >>$WEB/statistike/croatia-users.csv
+  cp -p $WEB/statistike/croatia-users.csv $WEB/croatia/statistike/$yesterday-croatia-users.csv
+
   echo '<html><head><title> OSM Statistike</title>' >$statistike
   echo '<script src="http://data.osm-hr.org/statistike/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-8"/></head><body>' >>$statistike
   echo '<center><h1>Statistike za croatia.osm.pbf</h1></center>'>>$statistike 
@@ -316,11 +322,9 @@ if [ $hour -eq 00 ]
   exec 3>&-
   echo '</table></body></html>' >> $statistike
   
-  #salje csv i htm u web folder
+  #country user stats.htm to web folder
   cp -p $statistike $WEB/statistike/croatia-stats.htm
   mv $statistike $WEB/croatia/statistike/$yesterday-croatia-stats.htm
-  cat $korstat2 | tr "." "," >$WEB/statistike/croatia-users.csv
-  cp -p $WEB/statistike/croatia-users.csv $WEB/croatia/statistike/$yesterday-croatia-users.csv
 
   rm $STATS/croatia.osm
 
@@ -331,6 +335,9 @@ if [ $hour -eq 00 ]
     for drzava in albania bosnia-herzegovina bulgaria hungary kosovo macedonia montenegro romania serbia slovenia
     do
     
+      TOTAL_NODE=0
+      TOTAL_WAY=0
+      TOTAL_RELATION=0
       $osmosis --read-pbf file="$PBF/$drzava.osm.pbf" --write-xml file="$STATS/$drzava.osm"
     
       #pretrazuje osm i izvlaci korisnike van
@@ -364,26 +371,34 @@ if [ $hour -eq 00 ]
       TOTAL_RELATION=$(( $TOTAL_RELATION + $USER_RELATION ))
       done
       exec 3>&-
+
+      #country total stats
+      echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/$drzava-total.csv
+      cp -p $REPLEX/$drzava-total.csv $WEB/statistike/$drzava-total.csv
+
     
       #sortiranje sa zarezom
       #sort -t, -k2,2nr $korstat1 >$korstat2
       #sortiranje sa tockom i zamjenom u zarez
-      #  sort -t "." -k 2nr $korstat1 | tr "." "," >$korstat2 
+      # sort -t "." -k 2nr $korstat1 | tr "." "," >$korstat2 
       sort -f -t "." -k 2nr $korstat1 >$korstat2
       
-      #zapisuje statitiske za drzavu
-      echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/$drzava-stats.csv
-      
-      echo '<html><head><title> OSM Statistike</title>' >$statistike
+      #country user stats.csv to web folder
+      echo 'user,nodes,ways,relations,lastedit' >$WEB/statistike/$drzava-users.csv
+      cat $korstat2 | tr "." "," >>$WEB/statistike/$drzava-users.csv
+      cp -p $WEB/statistike/$drzava-users.csv $WEB/statistike/$yesterday-$drzava-users.csv
+     
+      #html export 
+      echo '<html><head><title> OSM Stats</title>' >$statistike
       echo '<script src="http://data.osm-hr.org/statistike/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-  8"/></head><body>' >>$statistike
-      echo '<center><h1>Statistike za '$drzava.osm.pbf'</h1></center>'>>$statistike 
-      echo 'Datum podataka:'$yesterday >>$statistike
-      echo '<br>Broj korisnika:'`cat $svikorisnici | wc -l` >>$statistike
-      echo '<br>Broj točaka:'$TOTAL_NODE >>$statistike
-      echo '<br>Broj puteva:'$TOTAL_WAY >>$statistike
-      echo '<br>Broj relacija:'$TOTAL_RELATION >>$statistike
+      echo '<center><h1>Stats for '$drzava.osm.pbf'</h1></center>'>>$statistike 
+      echo 'Date of file:'$yesterday >>$statistike
+      echo '<br>Number of users:'`cat $svikorisnici | wc -l` >>$statistike
+      echo '<br>Number of nodes:'$TOTAL_NODE >>$statistike
+      echo '<br>Number of ways:'$TOTAL_WAY >>$statistike
+      echo '<br>Number of relations:'$TOTAL_RELATION >>$statistike
       echo '<table class="sortable" style="width: 100%; border: 1px solid gray" border=1 width=100%>' >>$statistike
-      echo '<tr><td>Korisnik</td><td>Točke</td><td>%</td><td>Putevi</td><td>%</td><td>Relacije</td><td>%</td><td>Zadnji put uređivao</td></tr>' >>  $statistike
+      echo '<tr><td>User</td><td>Nodes</td><td>%</td><td>Ways</td><td>%</td><td>Relations</td><td>%</td><td>Last edit</td></tr>' >>  $statistike
       exec 3<"$korstat2"
       
       while read <&3 -r LINE
@@ -394,12 +409,10 @@ if [ $hour -eq 00 ]
       exec 3>&-
       echo '</table></body></html>' >> $statistike
       
-      #salje csv i htm u web folder
+      #country user stats.htm to web folder
       cp -p $statistike $WEB/statistike/$drzava-stats.htm
       mv $statistike $WEB/statistike/$yesterday-$drzava-stats.htm
-      cat $korstat2 | tr "." "," >$WEB/statistike/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/statistike/$yesterday-$drzava-users.csv
-    
+   
       rm $STATS/$drzava.osm
     done
   fi
@@ -417,9 +430,6 @@ kraj=`date +%s`
 vrijeme="$(( $kraj - $pocetak ))"
 echo "Kompeletna promjena gotova za" $vrijeme "sekundi." >> $LOG
 echo "Kompeletna promjena gotova u: "`date +%Y%m%d-%H%M%S` >> $LOG
-
-
-rm $CACHE/*
 
 chmod -R 755 $WEB
 echo "Kraj u: "`date +%Y%m%d-%H%M%S` >> $LOG
