@@ -4,7 +4,7 @@
 #time setup
 today=$(date +"%Y%m%d")
 yesterday=$(date +"%Y%m%d" --date='yesterday')
-2daysago=$(date +"%Y%m%d" --date='2 day ago')
+daysago=$(date +"%Y%m%d" --date='2 day ago')
 olddate=$(date +"%Y%m%d" --date='10 days ago')
 #hour in day, needed for daiyl export vs regular export
 hour=$(date +%H)
@@ -13,7 +13,7 @@ hour=$(date +%H)
 #first day of month, needed for monthly export
 dayom01=$(date +%d)
 #simulates firsf of month for testing
-#dayom01=$(date +%d)
+#dayom01=01
 
 #geofabrik link for .bz2
 GEOFABRIK=http://download.geofabrik.de/europe
@@ -23,6 +23,7 @@ EUROPE=$REPLEX/europe
 DATA=$REPLEX/data
 CACHE=$REPLEX/cache
 POLY=$REPLEX/poly
+STATS=$REPLEX/stats
 #www-data folderi
 WEB=/osm/www-data
 PBF=$WEB/osm
@@ -43,14 +44,14 @@ LOG=$REPLEX/replex.log
 CHANGESET=changeset-hour.osc.gz
 CHANGESETSIMPLE=changeset-hour-simple.osc.gz
 #statistike
-korisnici=$CACHE/korisnici.txt
-korisnici_n=$CACHE/korisnici_n.txt
-korisnici_wr=$CACHE/korisnici_wr.txt
-svikorisnici=$CACHE/korisnici_svi.txt
-korpod=$CACHE/korisnici_podatci.txt
-korstat1=$CACHE/korisnici_statistike_1.txt
-korstat2=$CACHE/korisnici_statistike_2.txt
-statistike=$CACHE/statistike.htm
+korisnici=$STATS/korisnici.txt
+korisnici_n=$STATS/korisnici_n.txt
+korisnici_wr=$STATS/korisnici_wr.txt
+svikorisnici=$STATS/korisnici_svi.txt
+korpod=$STATS/korisnici_podatci.txt
+korstat1=$STATS/korisnici_statistike_1.txt
+korstat2=$STATS/korisnici_statistike_2.txt
+statistike=$STATS/statistike.htm
 
 
 
@@ -151,17 +152,18 @@ done
 #uvjet da se izvršava samo u ponoć
 if [ $hour -eq 00 ]
   then
-  for drzava in hrsibame hr-ba-rs-floods 
-  do
-  echo "Pocetak $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
-  $osmosis --read-pbf file="$EUROPE/europe-east.osm.pbf" --bounding-polygon clipIncompleteEntities="true" file="$POLY/$drzava.poly" --write-pbf file="$DATA/$drzava.osm.pbf" ; cp -p $DATA/$drzava.osm.pbf $PBF/$drzava.osm.pbf
-  echo "Kraj $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
-  done
+  ##disable hrsibame and floods
+  #for drzava in hrsibame hr-ba-rs-floods 
+  #do
+  #echo "Pocetak $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+  #$osmosis --read-pbf file="$EUROPE/europe-east.osm.pbf" --bounding-polygon clipIncompleteEntities="true" file="$POLY/$drzava.poly" --write-pbf file="$DATA/$drzava.osm.pbf" ; cp -p $DATA/$drzava.osm.pbf $PBF/$drzava.osm.pbf
+  #echo "Kraj $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+  #done
 
   ##kopira croatia sa datumom ######################
   cp -p $PBF/croatia.osm.pbf $WEB/croatia/arhiva/$yesterday-croatia.osm.pbf
   ## izvlaci dnevni changeset ######################
-  $osmosis --read-pbf file="$WEB/croatia/arhiva/$2daysago-croatia.osm.pbf" --read-pbf file="$WEB/croatia/arhiva/$yesterday-croatia.osm.pbf" --derive-change --write-xml-change compressionMethod=gzip file="$WEB/croatia/arhiva/$2daysago-$yesterday-croatia.osc.gz"
+  $osmosis --read-pbf file="$WEB/croatia/arhiva/$daysago-croatia.osm.pbf" --read-pbf file="$WEB/croatia/arhiva/$yesterday-croatia.osm.pbf" --derive-change --write-xml-change compressionMethod=gzip file="$WEB/croatia/arhiva/$2daysago-$yesterday-croatia.osc.gz"
 fi
 
 ############################################
@@ -169,7 +171,6 @@ fi
 ############################################
 
 #uvjet da se izvršava samo u 6 ujutro ############
-##ovo možda skroz ukloniti???
 if [ $hour -eq 06 ]
   then
   wget -q --tries=2 --timeout=5 $GEOFABRIK/croatia-latest.osm.bz2 -O $WEB/croatia/croatia.osm.bz2
@@ -191,7 +192,7 @@ if [ $hour -eq 00 ]
   pocetak5=`date +%s`
   ##normalne drzave exporti
   mapid=90000001
-  for drzava in europe-east albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia hrsibame hr-ba-rs-floods
+  for drzava in europe-east albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia #hrsibame hr-ba-rs-floods
   do
     echo "Početak $drzava garmina u: "`date +%Y%m%d-%H%M%S` >> $LOG
     rm $CACHE/*
@@ -205,7 +206,7 @@ if [ $hour -eq 00 ]
   mv $DATA/*-garmin.zip $WEB/garmin/
 
   ##spajanje topo i gmapsupp
-  for drzava in croatia hrsibame
+  for drzava in croatia #hrsibame
   do
     rm $CACHE/*
     java -Xmx$RAM -jar $MKGMAP --output-dir=$CACHE --gmapsupp $WEB/garmin/$drzava-gmapsupp.img $WEB/garmin/$drzava-topo25m.img
@@ -216,8 +217,8 @@ if [ $hour -eq 00 ]
   done
   rm $CACHE/*
 
-  #deleting these combinations becaus ewe don't want them in osmand generation
-  rm $DATA/europe-east.osm.pbf ; rm $DATA/hrsibame.osm.pbf ; rm $DATA/hr-ba-rs-floods.osm.pbf 
+  #deleting these combinations because we don't want them in osmand generation
+  rm $DATA/europe-east.osm.pbf #; rm $DATA/hrsibame.osm.pbf ; rm $DATA/hr-ba-rs-floods.osm.pbf 
   
   kraj=`date +%s`
   vrijeme="$(( $kraj - $pocetak5 ))"
@@ -260,10 +261,10 @@ if [ $hour -eq 00 ]
 
   pocetak6=`date +%s`
   
-  $osmosis --read-pbf file="$PBF/croatia.osm.pbf" --write-xml file="$CACHE/croatia.osm"
+  $osmosis --read-pbf file="$PBF/croatia.osm.pbf" --write-xml file="$STATS/croatia.osm"
   
   #pretrazuje osm i izvlaci korisnike van
-  grep -e "node \|way \|relation" $CACHE/croatia.osm | grep "user=" | awk '{print $6,$7,$8,$9,$10,$11,$12;}' | cut -d \" -f 2 | sort -f | uniq > $svikorisnici
+  grep -e "node \|way \|relation" $STATS/croatia.osm | grep "user=" | awk '{print $6,$7,$8,$9,$10,$11,$12;}' | cut -d \" -f 2 | sort -f | uniq > $svikorisnici
   
   rm -f $korstat1
   USER_No=1
@@ -271,7 +272,7 @@ if [ $hour -eq 00 ]
   while read <&3 -r LINE
   do 
      NICK="user="\"$LINE\"
-     grep -F "$NICK" $CACHE/croatia.osm > $korpod
+     grep -F "$NICK" $STATS/croatia.osm > $korpod
         DATE_LIST=`awk '{print $4;}' $korpod | cut -d \" -f 2 | sort`
         DATE_LAST=`echo "$DATE_LIST" | tail -n1`
         DATE_LIST=""
@@ -329,11 +330,8 @@ if [ $hour -eq 00 ]
   cat $korstat2 | tr "." "," >$WEB/statistike/croatia-users.csv
   cp -p $WEB/statistike/croatia-users.csv $WEB/croatia/statistike/$yesterday-croatia.csv
 
-  rm $CACHE/croatia.osm
+  rm $STATS/croatia.osm
 
-
-<<COMMENT
-  ##TODO
   ##statistike i za ostale drzave
   ##############################################################
   if [ $dayom01 -eq 01 ]
@@ -341,10 +339,10 @@ if [ $hour -eq 00 ]
     for drzava in albania bosnia-herzegovina bulgaria hungary kosovo macedonia montenegro romania serbia slovenia
     do
     
-      $osmosis --read-pbf file="$PBF/$drzava.osm.pbf" --write-xml file="$CACHE/$drzava.osm"
+      $osmosis --read-pbf file="$PBF/$drzava.osm.pbf" --write-xml file="$STATS/$drzava.osm"
     
       #pretrazuje osm i izvlaci korisnike van
-      grep -e "node \|way \|relation" $CACHE/$drzava.osm | grep "user=" | awk '{print $6,$7,$8,$9,$10,$11,$12;}' | cut -d \" -f 2 | sort -f | uniq  > $svikorisnici
+      grep -e "node \|way \|relation" $STATS/$drzava.osm | grep "user=" | awk '{print $6,$7,$8,$9,$10,$11,$12;}' | cut -d \" -f 2 | sort -f | uniq  > $svikorisnici
       
       rm -f $korstat1
       USER_No=1
@@ -352,7 +350,7 @@ if [ $hour -eq 00 ]
       while read <&3 -r LINE
       do 
          NICK="user="\"$LINE\"
-         grep -F "$NICK" $CACHE/$drzava.osm > $korpod
+         grep -F "$NICK" $STATS/$drzava.osm > $korpod
             DATE_LIST=`awk '{print $4;}' $korpod | cut -d \" -f 2 | sort`
             DATE_LAST=`echo "$DATE_LIST" | tail -n1`
             DATE_LIST=""
@@ -406,19 +404,19 @@ if [ $hour -eq 00 ]
       
       #salje csv i htm u web folder
       cp -p $statistike $WEB/statistike/statistike-$drzava.htm
-      mv $statistike $WEB/$drzava/statistike/$yesterday-$drzava.htm
+      mv $statistike $WEB/$yesterday-$drzava.htm
       cat $korstat2 | tr "." "," >$WEB/statistike/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/$drzava/statistike/$yesterday-$drzava.csv
+      cp -p $WEB/statistike/$drzava-users.csv $WEB/$yesterday-$drzava.csv
     
-      rm $CACHE/$drzava.osm
+      rm $STATS/$drzava.osm
     done
   fi
-COMMENT
 
   kraj=`date +%s`
   vrijeme="$(( $kraj - $pocetak6 ))"
   echo "Statistike gotove za" $vrijeme "sekundi." >> $LOG
   echo "Kraj statistika u: "`date +%Y%m%d-%H%M%S` >> $LOG
+
 fi
 
 
