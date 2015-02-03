@@ -406,7 +406,7 @@ if [ $hour -eq 00 ]
       cp -p $statistike $WEB/statistike/statistike-$drzava.htm
       mv $statistike $WEB/$yesterday-$drzava.htm
       cat $korstat2 | tr "." "," >$WEB/statistike/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/$yesterday-$drzava.csv
+      cp -p $WEB/statistike/$drzava-users.csv $WEB/statistike/$yesterday-$drzava.csv
     
       rm $STATS/$drzava.osm
     done
