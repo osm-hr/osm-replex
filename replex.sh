@@ -152,14 +152,6 @@ done
 #uvjet da se izvršava samo u ponoć
 if [ $hour -eq 00 ]
   then
-  ##disable hrsibame and floods
-  #for drzava in hrsibame hr-ba-rs-floods 
-  #do
-  #echo "Pocetak $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
-  #$osmosis --read-pbf file="$EUROPE/europe-east.osm.pbf" --bounding-polygon clipIncompleteEntities="true" file="$POLY/$drzava.poly" --write-pbf file="$DATA/$drzava.osm.pbf" ; cp -p $DATA/$drzava.osm.pbf $PBF/$drzava.osm.pbf
-  #echo "Kraj $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
-  #done
-
   ##kopira croatia sa datumom ######################
   cp -p $PBF/croatia.osm.pbf $WEB/croatia/arhiva/$yesterday-croatia.osm.pbf
   ## izvlaci dnevni changeset ######################
@@ -192,7 +184,7 @@ if [ $hour -eq 00 ]
   pocetak5=`date +%s`
   ##normalne drzave exporti
   mapid=90000001
-  for drzava in europe-east albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia #hrsibame hr-ba-rs-floods
+  for drzava in europe-east albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia
   do
     echo "Početak $drzava garmina u: "`date +%Y%m%d-%H%M%S` >> $LOG
     rm $CACHE/*
@@ -217,8 +209,8 @@ if [ $hour -eq 00 ]
   done
   rm $CACHE/*
 
-  #deleting these combinations because we don't want them in osmand generation
-  rm $DATA/europe-east.osm.pbf #; rm $DATA/hrsibame.osm.pbf ; rm $DATA/hr-ba-rs-floods.osm.pbf 
+  #deleting europe because we don't want it in osmand generation
+  rm $DATA/europe-east.osm.pbf
   
   kraj=`date +%s`
   vrijeme="$(( $kraj - $pocetak5 ))"
@@ -325,10 +317,10 @@ if [ $hour -eq 00 ]
   echo '</table></body></html>' >> $statistike
   
   #salje csv i htm u web folder
-  cp -p $statistike $WEB/statistike/statistike-croatia.htm
-  mv $statistike $WEB/croatia/statistike/$yesterday-croatia.htm
+  cp -p $statistike $WEB/statistike/croatia-stats.htm
+  mv $statistike $WEB/croatia/statistike/$yesterday-croatia-stats.htm
   cat $korstat2 | tr "." "," >$WEB/statistike/croatia-users.csv
-  cp -p $WEB/statistike/croatia-users.csv $WEB/croatia/statistike/$yesterday-croatia.csv
+  cp -p $WEB/statistike/croatia-users.csv $WEB/croatia/statistike/$yesterday-croatia-users.csv
 
   rm $STATS/croatia.osm
 
@@ -403,10 +395,10 @@ if [ $hour -eq 00 ]
       echo '</table></body></html>' >> $statistike
       
       #salje csv i htm u web folder
-      cp -p $statistike $WEB/statistike/statistike-$drzava.htm
-      mv $statistike $WEB/$yesterday-$drzava.htm
+      cp -p $statistike $WEB/statistike/$drzava-stats.htm
+      mv $statistike $WEB/statistike/$yesterday-$drzava-stats.htm
       cat $korstat2 | tr "." "," >$WEB/statistike/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/statistike/$yesterday-$drzava.csv
+      cp -p $WEB/statistike/$drzava-users.csv $WEB/statistike/$yesterday-$drzava-users.csv
     
       rm $STATS/$drzava.osm
     done
