@@ -169,9 +169,10 @@ fi
 ############################################
 
 #uvjet da se izvršava samo u 6 ujutro ############
+##ovo možda skroz ukloniti???
 if [ $hour -eq 06 ]
   then
-  wget -q --tries=2 --timeout=5 $GEOFABRIK/croatia-latest.osm.bz2 -O $WEB/croatia/arhiva/$2daysago-croatia.osm.bz2
+  wget -q --tries=2 --timeout=5 $GEOFABRIK/croatia-latest.osm.bz2 -O $WEB/croatia/croatia.osm.bz2
 fi
 
 kraj=`date +%s`
