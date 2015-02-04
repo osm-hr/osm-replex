@@ -97,31 +97,34 @@ $osmosis --read-xml-change file="$REPLEX/$CHANGESETSIMPLE" --read-pbf file="$EUR
 ## backup europe-east.osm.pbf i state.txt ##
 ############################################
 
-#micanje starih fajlova
+#remove changesets
 rm $REPLEX/$CHANGESET
 rm $REPLEX/$CHANGESETSIMPLE
-mv $REPLEX/europe-east.osm.pbf $EUROPE/europe-east.osm.pbf; cp -p $EUROPE/europe-east.osm.pbf $PBF/europe-east.osm.pbf 
 
-#kopira europu u web direktorij
-#cp -p $EUROPE/europe-east.osm.pbf $PBF/europe-east.osm.pbf
-cp -p $REPLEX/state.txt $EUROPE/state.txt; cp -p $REPLEX/state.txt $PBF/state.txt
+#move new europe file over old one and copy it to web
+mv $REPLEX/europe-east.osm.pbf $EUROPE/europe-east.osm.pbf; cp -p $EUROPE/europe-east.osm.pbf $PBF/europe-east.osm.pbf 
+#copy state file to web
+cp -p $REPLEX/state.txt $PBF/state.txt
 
 ###################################################
 ## dnevni backup europe-east.osm.pbf i state.txt ##
 ###################################################
 
-#uvjet da se izvršava samo u ponoć
+#only once a day at midnight instance
 if [ $hour -eq 00 ]
   then
+  #create state.txt dated backup
   cp -p $REPLEX/state.txt $EUROPE/$yesterday-state.txt
+  #create europe file dated backup and copy europe file to data for daily garmin generation
   cp -p $EUROPE/europe-east.osm.pbf $EUROPE/$yesterday-europe-east.osm.pbf; cp -p $EUROPE/europe-east.osm.pbf $DATA/europe-east.osm.pbf
 
   if [ $dayom01 -eq 01 ]
    then
+   #copy europe dated backup to web monthly folder
    cp -p $EUROPE/$yesterday-europe-east.osm.pbf $WEB/monthly/$yesterday-europe-east.osm.pbf
   fi
   
-  #micanje starih europa fajlova
+  #remove old dated europe backups
   rm $EUROPE/$olddate-europe-east.osm.pbf
 fi
 
