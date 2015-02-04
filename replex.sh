@@ -294,11 +294,8 @@ if [ $hour -eq 00 ]
   #country total stats
   echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/croatia-total.csv
 
-  #sortiranje sa zarezom
-  #sort -t, -k2,2nr $korstat1 >$korstat2
-  #sortiranje sa tockom i zamjenom u zarez
-  #  sort -t "." -k 2nr $korstat1 | tr "." "," >$korstat2 
-  sort -f -t "." -k 2nr $korstat1 >$korstat2
+  #sort by 2nd, then 3rd, then 4th column, node, way, relation
+  sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
 
   #country user stats.csv to web folder
   echo 'user,nodes,ways,relations,lastedit' >$WEB/statistike/croatia-users.csv
