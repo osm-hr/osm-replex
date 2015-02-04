@@ -56,7 +56,7 @@ statistike=$STATS/statistike.htm
 
 
 echo "===== S T A R T replikacije====="  >> $LOG
-echo "Početak u: "`date +%Y%m%d-%H%M%S` >> $LOG
+echo `date +%Y-%m-%d-%H:%M:%S`": Starting script" >> $LOG
 pocetak=`date +%s`
 
 ############################################
@@ -67,8 +67,7 @@ pocetak=`date +%s`
 $osmosis --rri workingDirectory=$REPLEX --sort-change --wxc $REPLEX/$CHANGESET
 kraj=`date +%s`
 vrijeme="$(( $kraj - $pocetak ))"
-echo "Changeset gotov za" $vrijeme "sekundi." >> $LOG
-echo "Kraj changeseta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+echo `date +%Y-%m-%d-%H:%M:%S`": Changeset finished in" $vrijeme "seconds." >> $LOG
 
 #ispiši datum u log
 awk '{if (NR!=1) {print}}' $REPLEX/state.txt >> $LOG
@@ -83,7 +82,7 @@ $osmosis --read-xml-change file="$REPLEX/$CHANGESET" --simplify-change --write-x
 kraj=`date +%s`
 vrijeme="$(( $kraj - $pocetak2 ))"
 echo "Changeset pojednostavljen za" $vrijeme "sekundi." >> $LOG
-echo "Kraj pojednostavljenja changeseta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+echo "Kraj pojednostavljenja changeseta u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG 
 
 ############################################
 ## Primjena changeseta uz rezanje granice ##
@@ -133,7 +132,7 @@ chmod -R 755 $EUROPE
 kraj=`date +%s`
 vrijeme="$(( $kraj - $pocetak3 ))"
 echo "Changeset primjenjen i odrezan za" $vrijeme "sekundi." >> $LOG
-echo "Kraj primjene changeseta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+echo "Kraj primjene changeseta u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG 
 
 
 #####################
@@ -146,9 +145,9 @@ pocetak4=`date +%s`
 #izvlaci drzavu iz europe ########################
 for drzava in albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia 
 do
-  echo "Pocetak $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+  echo "Pocetak $drzava extracta u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG 
   $osmosis --read-pbf file="$EUROPE/europe-east.osm.pbf" --bounding-polygon clipIncompleteEntities="true" file="$POLY/$drzava.poly" --write-pbf   file="$DATA/$drzava.osm.pbf"; cp -p $DATA/$drzava.osm.pbf $PBF/$drzava.osm.pbf
-  echo "Kraj $drzava extracta u: "`date +%Y%m%d-%H%M%S` >> $LOG 
+  echo "Kraj $drzava extracta u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG 
 done
 
 #izvlaci drzave iz europe #########################
@@ -174,7 +173,7 @@ fi
 kraj=`date +%s`
 vrijeme="$(( $kraj - $pocetak4 ))"
 echo "Ekstrakti gotovi za" $vrijeme "sekundi." >> $LOG
-echo "Kraj ekstrakta u: "`date +%Y%m%d-%H%M%S` >> $LOG
+echo "Kraj ekstrakta u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 
 
 ####################
@@ -189,14 +188,14 @@ if [ $hour -eq 00 ]
   mapid=90000001
   for drzava in europe-east albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia
   do
-    echo "Početak $drzava garmina u: "`date +%Y%m%d-%H%M%S` >> $LOG
+    echo "Početak $drzava garmina u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
     rm $CACHE/*
     java -Xmx$RAM -jar $SPLITTER --output-dir=$CACHE --mapid=$mapid --cache=$CACHE $DATA/$drzava.osm.pbf 
     java -Xmx$RAM -jar $MKGMAP --output-dir=$CACHE --index --gmapsupp --series-name="OSM $drzava - d1" --family-name="OSM $drzava" --country-name="$drzava" --remove-short-arcs --net --route --generate-sea:no-sea-sectors,extend-sea-sectors $CACHE/90*.osm.pbf
     mv $CACHE/gmapsupp.img $WEB/garmin/$drzava-gmapsupp.img
     zip -j $DATA/$drzava-garmin.zip $CACHE/*90*.img $CACHE/osmmap.*
     mapid=$(($mapid + 10000))
-    echo "Kraj $drzava garmina u: "`date +%Y%m%d-%H%M%S` >> $LOG
+    echo "Kraj $drzava garmina u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
   done
   mv $DATA/*-garmin.zip $WEB/garmin/
 
@@ -218,7 +217,7 @@ if [ $hour -eq 00 ]
   kraj=`date +%s`
   vrijeme="$(( $kraj - $pocetak5 ))"
   echo "Garmin gotov za" $vrijeme "sekundi." >> $LOG
-  echo "Kraj garmina u: "`date +%Y%m%d-%H%M%S` >> $LOG
+  echo "Kraj garmina u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 fi
 
 ####################
@@ -231,7 +230,7 @@ if [ $hour -eq 00 ]
   #osmand karte 
   pocetak7=`date +%s`
 
-  echo "Početak OsmAnd-a u: "`date +%Y%m%d-%H%M%S` >> $LOG
+  echo "Početak OsmAnd-a u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
  
   #cd $OSMANDMCMC
   #java -Djava.util.logging.config.file=$REPLEX/logging.properties -Xms64M -Xmx$RAM -cp "$OSMANDMC/OsmAndMapCreator.jar:$OSMANDMC/lib/OsmAnd-core.jar:$OSMANDMC/lib/*.jar" net.osmand.data.index.IndexBatchCreator $REPLEX/batch.xml
@@ -241,7 +240,7 @@ if [ $hour -eq 00 ]
   kraj=`date +%s`
   vrijeme="$(( $kraj - $pocetak7 ))"
   echo "OsmAnd gotov za" $vrijeme "sekundi." >> $LOG
-  echo "Kraj OsmAnd-a u: "`date +%Y%m%d-%H%M%S` >> $LOG
+  echo "Kraj OsmAnd-a u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 fi
 
 rm $CACHE/*
@@ -253,7 +252,7 @@ rm $CACHE/*
 #uvjet da se izvršava samo u ponoć
 if [ $hour -eq 00 ]
   then
-  echo "Početak statistika u: "`date +%Y%m%d-%H%M%S` >> $LOG
+  echo "Početak statistika u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 
   pocetak6=`date +%s`
   
@@ -293,6 +292,8 @@ if [ $hour -eq 00 ]
 
   #country total stats
   echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/croatia-total.csv
+  cp -p $REPLEX/croatia-total.csv $WEB/statistike/croatia-total.csv
+  #cp -p $REPLEX/croatia-total.csv $WEB/$drzava/stats/croatia-total.csv
 
   #sort by 2nd, then 3rd, then 4th column, node, way, relation
   sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
@@ -375,6 +376,7 @@ if [ $hour -eq 00 ]
       #country total stats
       echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/$drzava-total.csv
       cp -p $REPLEX/$drzava-total.csv $WEB/statistike/$drzava-total.csv
+      #cp -p $REPLEX/$drzava-total.csv $WEB/$drzava/stats/$drzava-total.csv
 
       #sort by 2nd, then 3rd, then 4th column, node, way, relation
       sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
@@ -382,7 +384,8 @@ if [ $hour -eq 00 ]
       #country user stats.csv to web folder
       echo 'user,nodes,ways,relations,lastedit' >$WEB/statistike/$drzava-users.csv
       cat $korstat2 | tr "." "," >>$WEB/statistike/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/statistike/$yesterday-$drzava-users.csv
+      cp -p $WEB/statistike/$drzava-users.csv $WEB/$drzava/stats/$drzava-users.csv
+      cp -p $WEB/statistike/$drzava-users.csv $WEB/$drzava/stats/$yesterday-$drzava-users.csv
      
       #html export 
       echo '<html><head><title> OSM Stats</title>' >$statistike
@@ -407,7 +410,7 @@ if [ $hour -eq 00 ]
       
       #country user stats.htm to web folder
       cp -p $statistike $WEB/statistike/$drzava-stats.htm
-      mv $statistike $WEB/statistike/$yesterday-$drzava-stats.htm
+      mv $statistike $WEB/$drzava/stats/$yesterday-$drzava-stats.htm
    
       rm $STATS/$drzava.osm
     done
@@ -416,7 +419,7 @@ if [ $hour -eq 00 ]
   kraj=`date +%s`
   vrijeme="$(( $kraj - $pocetak6 ))"
   echo "Statistike gotove za" $vrijeme "sekundi." >> $LOG
-  echo "Kraj statistika u: "`date +%Y%m%d-%H%M%S` >> $LOG
+  echo "Kraj statistika u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 
 fi
 
@@ -425,8 +428,8 @@ fi
 kraj=`date +%s`
 vrijeme="$(( $kraj - $pocetak ))"
 echo "Kompeletna promjena gotova za" $vrijeme "sekundi." >> $LOG
-echo "Kompeletna promjena gotova u: "`date +%Y%m%d-%H%M%S` >> $LOG
+echo "Kompeletna promjena gotova u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 
 chmod -R 755 $WEB
-echo "Kraj u: "`date +%Y%m%d-%H%M%S` >> $LOG
+echo "Kraj u: "`date +%Y-%m-%d-%H:%M:%S` >> $LOG
 echo "===== K R A J replikacije====="  >> $LOG
