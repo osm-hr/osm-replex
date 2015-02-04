@@ -155,7 +155,7 @@ if [ $hour -eq 00 ]
   ##kopira croatia sa datumom ######################
   cp -p $PBF/croatia.osm.pbf $WEB/croatia/arhiva/$yesterday-croatia.osm.pbf
   ## izvlaci dnevni changeset ######################
-  $osmosis --read-pbf file="$WEB/croatia/arhiva/$daysago-croatia.osm.pbf" --read-pbf file="$WEB/croatia/arhiva/$yesterday-croatia.osm.pbf" --derive-change --write-xml-change compressionMethod=gzip file="$WEB/croatia/arhiva/$2daysago-$yesterday-croatia.osc.gz"
+  $osmosis --read-pbf file="$WEB/croatia/arhiva/$daysago-croatia.osm.pbf" --read-pbf file="$WEB/croatia/arhiva/$yesterday-croatia.osm.pbf" --derive-change --write-xml-change compressionMethod=gzip file="$WEB/croatia/arhiva/$daysago-$yesterday-croatia.osc.gz"
 fi
 
 ############################################
