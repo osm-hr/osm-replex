@@ -7,13 +7,13 @@ yesterday=$(date +"%Y%m%d" --date='yesterday')
 daysago=$(date +"%Y%m%d" --date='2 day ago')
 olddate=$(date +"%Y%m%d" --date='10 days ago')
 #hour in day, needed for daiyl export vs regular export
-#hour=$(date +%H)
+hour=$(date +%H)
 #simulates midnight for testing
-hour=00
+#hour=00
 #first day of month, needed for monthly export
-#dayom01=$(date +%d)
+dayom01=$(date +%d)
 #simulates firsf of month for testing
-dayom01=01
+#dayom01=01
 
 #replex folders
 REPLEX=/osm/osm-replex
