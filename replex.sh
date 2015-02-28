@@ -7,13 +7,13 @@ yesterday=$(date +"%Y%m%d" --date='yesterday')
 daysago=$(date +"%Y%m%d" --date='2 day ago')
 olddate=$(date +"%Y%m%d" --date='10 days ago')
 #hour in day, needed for daiyl export vs regular export
-hour=$(date +%H)
+#hour=$(date +%H)
 #simulates midnight for testing
-#hour=00
+hour=00
 #first day of month, needed for monthly export
-dayom01=$(date +%d)
+#dayom01=$(date +%d)
 #simulates firsf of month for testing
-#dayom01=01
+dayom01=01
 
 #replex folders
 REPLEX=/osm/osm-replex
@@ -166,12 +166,22 @@ if [ $hour -eq 00 ]
   start_time=`date +%s`
   then
   ##kopira croatia sa datumom ######################
-  cp -p $PBF/croatia.osm.pbf $WEB/croatia/arhiva/$yesterday-croatia.osm.pbf
+  cp -p $PBF/croatia.osm.pbf $WEB/croatia/archive/$yesterday-croatia.osm.pbf
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - Croatia daily archive created." >> $LOG
   ## izvlaci dnevni changeset ######################
-  $osmosis --read-pbf file="$WEB/croatia/arhiva/$daysago-croatia.osm.pbf" --read-pbf file="$WEB/croatia/arhiva/$yesterday-croatia.osm.pbf" --derive-change --write-xml-change compressionMethod=gzip file="$WEB/croatia/arhiva/$daysago-$yesterday-croatia.osc.gz"
+  $osmosis --read-pbf file="$WEB/croatia/archive/$daysago-croatia.osm.pbf" --read-pbf file="$WEB/croatia/archive/$yesterday-croatia.osm.pbf" --derive-change --write-xml-change compressionMethod=gzip file="$WEB/croatia/archive/$daysago-$yesterday-croatia.osc.gz"
   end_time=`date +%s`
   lasted="$(( $end_time - $start_time ))"
   echo `date +%Y-%m-%d\ %H:%M:%S`" - Croatia diff finished in" $lasted "seconds." >> $LOG
+  if [ $dayom01 -eq 01 ]
+   then
+   for drzava in albania bosnia-herzegovina bulgaria hungary kosovo macedonia montenegro romania serbia slovenia
+    do
+      #copy drzava monthly backup
+      cp -p $PBF/$drzava.osm.pbf $WEB/$drzava/archive/$yesterday-$drzava.osm.pbf
+      echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" monthly archive created." >> $LOG
+    done
+  fi
 fi
 
 ####################
@@ -295,17 +305,20 @@ if [ $hour -eq 00 ]
   echo `date +%Y-%m-%d\ %H:%M:%S`" - All croatia users and their ownership found in" $lasted "seconds." >> $LOG
 
   #country total stats
-  echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/croatia-total.csv
-  cp -p $REPLEX/croatia-total.csv $WEB/statistike/croatia-total.csv
-  #cp -p $REPLEX/croatia-total.csv $WEB/$drzava/stats/croatia-total.csv
+  echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $WEB/croatia/stats/croatia-total.csv
+  #next 2lines to be replaced with symlink on server
+  cp -p $WEB/croatia/stats/croatia-total.csv $WEB/croatia/croatia-total.csv
+  cp -p $WEB/croatia/stats/croatia-total.csv $WEB/statistics/croatia-total.csv
 
   #sort by 2nd, then 3rd, then 4th column, node, way, relation
   sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
 
   #country user stats.csv to web folder
-  echo 'user,nodes,ways,relations,lastedit' >$WEB/statistike/croatia-users.csv
-  cat $korstat2 | tr "." "," >>$WEB/statistike/croatia-users.csv
-  cp -p $WEB/statistike/croatia-users.csv $WEB/croatia/statistike/$yesterday-croatia-users.csv
+  echo 'user,nodes,ways,relations,lastedit' >$WEB/croatia/croatia-users.csv
+  cat $korstat2 | tr "." "," >>$WEB/croatia/croatia-users.csv
+  cp -p $WEB/croatia/croatia-users.csv $WEB/croatia/stats/$yesterday-croatia-users.csv
+  #next line to be replaced with symlink on server
+  cp -p $WEB/croatia/croatia-users.csv $WEB/statistics/croatia-users.csv
   echo `date +%Y-%m-%d\ %H:%M:%S`" - croatia csv files created and copied to web." >> $LOG
 
   echo '<html><head><title> OSM Statistike</title>' >$statistike
@@ -329,8 +342,8 @@ if [ $hour -eq 00 ]
   echo '</table></body></html>' >> $statistike
   
   #country user stats.htm to web folder
-  cp -p $statistike $WEB/statistike/croatia-stats.htm
-  mv $statistike $WEB/croatia/statistike/$yesterday-croatia-stats.htm
+  cp -p $statistike $WEB/statistics/croatia-stats.htm
+  mv $statistike $WEB/croatia/croatia-stats.htm
   echo `date +%Y-%m-%d\ %H:%M:%S`" - croatia htm files created and copied to web." >> $LOG
 
   rm $STATS/croatia.osm
@@ -392,18 +405,20 @@ if [ $hour -eq 00 ]
       echo `date +%Y-%m-%d\ %H:%M:%S`" - All "$drzava" users and their ownership found in" $lasted "seconds." >> $LOG
 
       #country total stats
-      echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $REPLEX/$drzava-total.csv
-      cp -p $REPLEX/$drzava-total.csv $WEB/statistike/$drzava-total.csv
-      #cp -p $REPLEX/$drzava-total.csv $WEB/$drzava/stats/$drzava-total.csv
+      echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $WEB/$drzava/stats/$drzava-total.csv
+      #next 2 lines to be replaced with symlink on server
+      cp -p $WEB/$drzava/stats/$drzava-total.csv $WEB/$drzava/$drzava-total.csv
+      cp -p $WEB/$drzava/stats/$drzava-total.csv $WEB/statistics/$drzava-total.csv
 
       #sort by 2nd, then 3rd, then 4th column, node, way, relation
       sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
-      
+   
       #country user stats.csv to web folder
-      echo 'user,nodes,ways,relations,lastedit' >$WEB/statistike/$drzava-users.csv
-      cat $korstat2 | tr "." "," >>$WEB/statistike/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/$drzava/stats/$drzava-users.csv
-      cp -p $WEB/statistike/$drzava-users.csv $WEB/$drzava/stats/$yesterday-$drzava-users.csv
+      echo 'user,nodes,ways,relations,lastedit' >$WEB/$drzava/$drzava-users.csv
+      cat $korstat2 | tr "." "," >>$WEB/$drzava/$drzava-users.csv
+      cp -p $WEB/$drzava/$drzava-users.csv $WEB/$drzava/stats/$yesterday-$drzava-users.csv
+      #next line to be replaced with symlink on server
+      cp -p $WEB/$drzava/$drzava-users.csv $WEB/statistics/$drzava-users.csv
       echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" csv files created and copied to web." >> $LOG
 
       #html export 
@@ -427,8 +442,8 @@ if [ $hour -eq 00 ]
       echo '</table></body></html>' >> $statistike
       
       #country user stats.htm to web folder
-      cp -p $statistike $WEB/statistike/$drzava-stats.htm
-      mv $statistike $WEB/$drzava/stats/$yesterday-$drzava-stats.htm
+      cp -p $statistike $WEB/statistics/$drzava-stats.htm
+      mv $statistike $WEB/$drzava/$drzava-stats.htm
       echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" htm files created and copied to web." >> $LOG
 
       rm $STATS/$drzava.osm
