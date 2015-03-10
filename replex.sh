@@ -322,7 +322,7 @@ if [ $hour -eq 00 ]
   echo `date +%Y-%m-%d\ %H:%M:%S`" - croatia csv files created and copied to web." >> $LOG
 
   echo '<html><head><title> OSM Statistike</title>' >$statistike
-  echo '<script src="http://data.osm-hr.org/statistike/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-8"/></head><body>' >>$statistike
+  echo '<script src="http://data.osm-hr.org/statistics/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-8"/></head><body>' >>$statistike
   echo '<center><h1>Statistike za croatia.osm.pbf</h1></center>'>>$statistike 
   echo 'Datum podataka:'$yesterday >>$statistike
   echo '<br>Broj korisnika:'`cat $svikorisnici | wc -l` >>$statistike
@@ -423,7 +423,7 @@ if [ $hour -eq 00 ]
 
       #html export 
       echo '<html><head><title> OSM Stats</title>' >$statistike
-      echo '<script src="http://data.osm-hr.org/statistike/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-  8"/></head><body>' >>$statistike
+      echo '<script src="http://data.osm-hr.org/statistics/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-  8"/></head><body>' >>$statistike
       echo '<center><h1>Stats for '$drzava.osm.pbf'</h1></center>'>>$statistike 
       echo 'Date of file:'$yesterday >>$statistike
       echo '<br>Number of users:'`cat $svikorisnici | wc -l` >>$statistike
