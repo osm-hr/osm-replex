@@ -1,7 +1,7 @@
 ##this is osmosos replication configuration file
 
 # The URL of the directory containing change files.
-baseUrl=http://planet.openstreetmap.org/replication/hour/
+baseUrl=https://planet.openstreetmap.org/replication/hour/
 
 # Defines the maximum time interval in seconds to download in a single invocation.
 # Setting to 0 disables this feature.
