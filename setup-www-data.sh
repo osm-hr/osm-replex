@@ -3,6 +3,7 @@
 
 ##web setup
 WEB=/osm/www-data
+mkdir $WEB 
 
 ##generic folders
 mkdir $WEB/floods
