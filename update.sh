@@ -22,13 +22,13 @@ wget -v -O - http://www.mkgmap.org.uk/download/splitter-latest.tar.gz | tar -xz 
 
 #for later use
 rm bin/osmfilter
-wget http://m.m.i24.cc/osmfilter32 -O bin/osmfilter32
+#wget http://m.m.i24.cc/osmfilter32 -O bin/osmfilter32
 #source&compile
-#wget -O - http://m.m.i24.cc/osmfilter.c |cc -x c - -O3 -o bin/osmfilter
+wget -O - http://m.m.i24.cc/osmfilter.c |cc -x c - -O3 -o bin/osmfilter
 
 #for later use
 rm bin/osmconvert
-wget http://m.m.i24.cc/osmconvert32 -O bin/osmconvert32
+#wget http://m.m.i24.cc/osmconvert32 -O bin/osmconvert32
 #source&compile
-#wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o bin/osmconvert
+wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o bin/osmconvert
 #In case of error with "zlib.h" not found : install zlib1g-dev 
