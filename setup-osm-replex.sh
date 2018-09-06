@@ -4,6 +4,9 @@
 ##ubuntu 14.04.1 clean install
 #sudo apt-get install zip unzip openjdk-7-jre
 
+##ubuntu 18.04.1 clean install
+#sudo apt-get install zip unzip openjdk-8-jre zlib1g-dev
+
 REPLEX=/osm/osm-replex
 
 mkdir $REPLEX/bin
