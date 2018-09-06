@@ -30,8 +30,8 @@ FLOODS=$WEB/floods
 TMS=/osm/www-tms
 #aplikacije
 osmosis=$REPLEX/bin/osmosis/bin/osmosis
-osmconvert=$REPLEX/bin/osmconvert32
-osmfilter=$REPLEX/bin/osmfilter32
+osmconvert=$REPLEX/bin/osmconvert
+osmfilter=$REPLEX/bin/osmfilter
 MKGMAP=$REPLEX/bin/mkgmap/mkgmap.jar
 SPLITTER=$REPLEX/bin/splitter/splitter.jar
 OSMANDMC=$REPLEX/bin/osmandmc
