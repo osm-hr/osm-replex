@@ -1,15 +1,17 @@
 #!/bin/bash
 #
 
-#rm -rf bin/osmosis
-#mkdir bin/osmosis
+rm -rf bin/osmosis
+mkdir bin/osmosis
 wget http://bretth.dev.openstreetmap.org/osmosis-build/osmosis-latest.zip -O bin/osmosis.zip
-##unzip to bin/osmosis
+unzip bin/osmosis.zip -d bin/osmosis/
+rm bin/osmosis.zip
 
-#rm -rf bin/osmandmc
-#mkdir bin/osmandmc
+rm -rf bin/osmandmc
+mkdir bin/osmandmc
 wget http://download.osmand.net/latest-night-build/OsmAndMapCreator-main.zip -O bin/osmandmc.zip
-##unzip to bin/osmandmc
+unzip bin/osmandmc.zip -d bin/osmandmc/
+rm bin/osmandmc.zip
 
 rm -rf bin/mkgmap
 mkdir bin/mkgmap

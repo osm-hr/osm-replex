@@ -259,94 +259,19 @@ if [ $hour -eq 00 ]
   echo `date +%Y-%m-%d\ %H:%M:%S`" - Croatia statistics starting." >> $LOG
 
   start_time=`date +%s`
-  $osmosis --read-pbf file="$PBF/croatia.osm.pbf" --write-xml file="$STATS/croatia.osm"
-  end_time=`date +%s`
-  lasted="$(( $end_time - $start_time ))"
-  echo `date +%Y-%m-%d\ %H:%M:%S`" - croatia.osm exported in" $lasted "seconds." >> $LOG
-
-  #pretrazuje osm i izvlaci korisnike van
-  start_time=`date +%s`
-  grep -e "node \|way \|relation" $STATS/croatia.osm | grep "user=" | awk '{print $6,$7,$8,$9,$10,$11,$12;}' | cut -d \" -f 2 | sort -f | uniq > $svikorisnici
-  end_time=`date +%s`
-  lasted="$(( $end_time - $start_time ))"
-  echo `date +%Y-%m-%d\ %H:%M:%S`" - Sorted out all croatia users in" $lasted "seconds." >> $LOG
-
-  start_time=`date +%s`
-  rm -f $korstat1
-  USER_No=1
-  exec 3<"$svikorisnici"
-  while read <&3 -r LINE
-  do 
-     NICK="user="\"$LINE\"
-     grep -F "$NICK" $STATS/croatia.osm > $korpod
-        DATE_LIST=`awk '{print $4;}' $korpod | cut -d \" -f 2 | sort`
-        DATE_LAST=`echo "$DATE_LIST" | tail -n1`
-        DATE_LIST=""
-     NODES=`grep -e "node " $korpod | wc -l`
-     WAYS=`grep -e "way " $korpod | wc -l`
-     RELATIONS=`grep -e "relation " $korpod | wc -l`
-     echo $LINE'.'$NODES'.'$WAYS'.'$RELATIONS'.'$DATE_LAST >> $korstat1
-  done
-  exec 3>&-
-  rm $korpod
-  exec 3<"$korstat1"
-  while read <&3 -r LINE   
+  for drzava in croatia
   do
-    USER_NODE=`echo "$LINE" | awk -F "." '{print $2;}'`
-    USER_WAY=`echo "$LINE" | awk -F "." '{print $3;}'`
-    USER_RELATION=`echo "$LINE" | awk -F "." '{print $4;}'`
-  TOTAL_NODE=$(( $TOTAL_NODE + $USER_NODE ))
-  TOTAL_WAY=$(( $TOTAL_WAY + $USER_WAY ))
-  TOTAL_RELATION=$(( $TOTAL_RELATION + $USER_RELATION ))
+    $osmconvert --out-statistics $PBF/$drzava.osm.pbf > $STATS/$drzava-stats.txt
+    TOTAL_NODE=`cat $STATS/$drzava-stats.txt | grep nodes | awk -F ' ' '{print $2}'`
+    TOTAL_WAY=`cat $STATS/$drzava-stats.txt | grep ways | awk -F ' ' '{print $2}'`
+    TOTAL_RELATION=`cat $STATS/$drzava-stats.txt | grep relations | awk -F ' ' '{print $2}'`
+    #country total stats
+    echo $yesterday,'empty,'$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $WEB/$drzava/stats/$drzava-total.csv
+    #next 2lines to be replaced with symlink on server
+    cp -p $WEB/$drzava/stats/$drzava-total.csv $WEB/$drzava/$drzava-total.csv
+    cp -p $WEB/$drzava/stats/$drzava-total.csv $WEB/statistics/$drzava-total.csv
+    echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" csv files created and copied to web." >> $LOG
   done
-  exec 3>&-
-  end_time=`date +%s`
-  lasted="$(( $end_time - $start_time ))"
-  echo `date +%Y-%m-%d\ %H:%M:%S`" - All croatia users and their ownership found in" $lasted "seconds." >> $LOG
-
-  #country total stats
-  echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $WEB/croatia/stats/croatia-total.csv
-  #next 2lines to be replaced with symlink on server
-  cp -p $WEB/croatia/stats/croatia-total.csv $WEB/croatia/croatia-total.csv
-  cp -p $WEB/croatia/stats/croatia-total.csv $WEB/statistics/croatia-total.csv
-
-  #sort by 2nd, then 3rd, then 4th column, node, way, relation
-  sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
-
-  #country user stats.csv to web folder
-  echo 'user,nodes,ways,relations,lastedit' >$WEB/croatia/croatia-users.csv
-  cat $korstat2 | tr "." "," >>$WEB/croatia/croatia-users.csv
-  cp -p $WEB/croatia/croatia-users.csv $WEB/croatia/stats/$yesterday-croatia-users.csv
-  #next line to be replaced with symlink on server
-  cp -p $WEB/croatia/croatia-users.csv $WEB/statistics/croatia-users.csv
-  echo `date +%Y-%m-%d\ %H:%M:%S`" - croatia csv files created and copied to web." >> $LOG
-
-  echo '<html><head><title> OSM Statistike</title>' >$statistike
-  echo '<script src="http://data.osm-hr.org/statistics/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-8"/></head><body>' >>$statistike
-  echo '<center><h1>Statistike za croatia.osm.pbf</h1></center>'>>$statistike 
-  echo 'Datum podataka:'$yesterday >>$statistike
-  echo '<br>Broj korisnika:'`cat $svikorisnici | wc -l` >>$statistike
-  echo '<br>Broj točaka:'$TOTAL_NODE >>$statistike
-  echo '<br>Broj puteva:'$TOTAL_WAY >>$statistike
-  echo '<br>Broj relacija:'$TOTAL_RELATION >>$statistike
-  echo '<table class="sortable" style="width: 100%; border: 1px solid gray" border=1 width=100%>' >>$statistike
-  echo '<tr><td>Korisnik</td><td>Točke</td><td>%</td><td>Putevi</td><td>%</td><td>Relacije</td><td>%</td><td>Zadnji put uređivao</td></tr>' >>$statistike
-  exec 3<"$korstat2"
-  
-  while read <&3 -r LINE
-  do
-    echo "$LINE" | awk -v Node=$TOTAL_NODE -v Way=$TOTAL_WAY -v Relation=$TOTAL_RELATION -F "." '{printf "<tr><td><a href=\"http://osm.org/user/%s\">%s</a>: <a href=\"http://hdyc.neis-one.org/?%s\">h</a>, <a href=\"http://yosmhm.neis-one.org/?%s\">y</a></td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td></tr>\n",$1,$1,$1,$1,$2,100*($2)/Node,$3,100*($3)/Way,$4,100*($4)/Relation,$5;}' >>$statistike
-
-  done
-  exec 3>&-
-  echo '</table></body></html>' >> $statistike
-  
-  #country user stats.htm to web folder
-  cp -p $statistike $WEB/statistics/croatia-stats.htm
-  mv $statistike $WEB/croatia/croatia-stats.htm
-  echo `date +%Y-%m-%d\ %H:%M:%S`" - croatia htm files created and copied to web." >> $LOG
-
-  rm $STATS/croatia.osm
 
   ##statistike i za ostale drzave
   ##############################################################
@@ -354,100 +279,18 @@ if [ $hour -eq 00 ]
   then
     for drzava in albania bosnia-herzegovina bulgaria hungary kosovo macedonia montenegro romania serbia slovenia
     do
-      echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" statistics starting." >> $LOG
-      start_time=`date +%s`
-      TOTAL_NODE=0
-      TOTAL_WAY=0
-      TOTAL_RELATION=0
-      $osmosis --read-pbf file="$PBF/$drzava.osm.pbf" --write-xml file="$STATS/$drzava.osm"
-      end_time=`date +%s`
-      lasted="$(( $end_time - $start_time ))"
-      echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava".osm exported in" $lasted "seconds." >> $LOG
-
-      #pretrazuje osm i izvlaci korisnike van
-      start_time=`date +%s`
-      grep -e "node \|way \|relation" $STATS/$drzava.osm | grep "user=" | awk '{print $6,$7,$8,$9,$10,$11,$12;}' | cut -d \" -f 2 | sort -f | uniq  > $svikorisnici
-      end_time=`date +%s`
-      lasted="$(( $end_time - $start_time ))"
-      echo `date +%Y-%m-%d\ %H:%M:%S`" - Sorted out all "$drzava" users in" $lasted "seconds." >> $LOG    
-
-      start_time=`date +%s`
-      rm -f $korstat1
-      USER_No=1
-      exec 3<"$svikorisnici"
-      while read <&3 -r LINE
-      do 
-         NICK="user="\"$LINE\"
-         grep -F "$NICK" $STATS/$drzava.osm > $korpod
-            DATE_LIST=`awk '{print $4;}' $korpod | cut -d \" -f 2 | sort`
-            DATE_LAST=`echo "$DATE_LIST" | tail -n1`
-            DATE_LIST=""
-         NODES=`grep -e "node " $korpod | wc -l`
-         WAYS=`grep -e "way " $korpod | wc -l`
-         RELATIONS=`grep -e "relation " $korpod | wc -l`
-         echo $LINE'.'$NODES'.'$WAYS'.'$RELATIONS'.'$DATE_LAST >> $korstat1
-      done
-      exec 3>&-
-      rm $korpod
-      exec 3<"$korstat1"
-      while read <&3 -r LINE   
-      do
-        USER_NODE=`echo "$LINE" | awk -F "." '{print $2;}'`
-        USER_WAY=`echo "$LINE" | awk -F "." '{print $3;}'`
-        USER_RELATION=`echo "$LINE" | awk -F "." '{print $4;}'`
-      TOTAL_NODE=$(( $TOTAL_NODE + $USER_NODE ))
-      TOTAL_WAY=$(( $TOTAL_WAY + $USER_WAY ))
-      TOTAL_RELATION=$(( $TOTAL_RELATION + $USER_RELATION ))
-      done
-      exec 3>&-
-      end_time=`date +%s`
-      lasted="$(( $end_time - $start_time ))"
-      echo `date +%Y-%m-%d\ %H:%M:%S`" - All "$drzava" users and their ownership found in" $lasted "seconds." >> $LOG
-
+      $osmconvert --out-statistics $PBF/$drzava.osm.pbf > $STATS/$drzava-stats.txt
+      TOTAL_NODE=`cat $STATS/$drzava-stats.txt | grep nodes | awk -F ' ' '{print $2}'`
+      TOTAL_WAY=`cat $STATS/$drzava-stats.txt | grep ways | awk -F ' ' '{print $2}'`
+      TOTAL_RELATION=`cat $STATS/$drzava-stats.txt | grep relations | awk -F ' ' '{print $2}'`
       #country total stats
-      echo $yesterday,`cat $svikorisnici | wc -l`','$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $WEB/$drzava/stats/$drzava-total.csv
-      #next 2 lines to be replaced with symlink on server
+      echo $yesterday,'empty,'$TOTAL_NODE','$TOTAL_WAY','$TOTAL_RELATION >> $WEB/$drzava/stats/$drzava-total.csv
+      #next 2lines to be replaced with symlink on server
       cp -p $WEB/$drzava/stats/$drzava-total.csv $WEB/$drzava/$drzava-total.csv
       cp -p $WEB/$drzava/stats/$drzava-total.csv $WEB/statistics/$drzava-total.csv
-
-      #sort by 2nd, then 3rd, then 4th column, node, way, relation
-      sort -f -t "." -k2,2nr -k3,3nr -k4,4nr  $korstat1 >$korstat2
-   
-      #country user stats.csv to web folder
-      echo 'user,nodes,ways,relations,lastedit' >$WEB/$drzava/$drzava-users.csv
-      cat $korstat2 | tr "." "," >>$WEB/$drzava/$drzava-users.csv
-      cp -p $WEB/$drzava/$drzava-users.csv $WEB/$drzava/stats/$yesterday-$drzava-users.csv
-      #next line to be replaced with symlink on server
-      cp -p $WEB/$drzava/$drzava-users.csv $WEB/statistics/$drzava-users.csv
-      echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" csv files created and copied to web." >> $LOG
-
-      #html export 
-      echo '<html><head><title> OSM Stats</title>' >$statistike
-      echo '<script src="http://data.osm-hr.org/statistics/sorttable.js"></script><meta http-equiv="content-type" content="text/html; charset=utf-  8"/></head><body>' >>$statistike
-      echo '<center><h1>Stats for '$drzava.osm.pbf'</h1></center>'>>$statistike 
-      echo 'Date of file:'$yesterday >>$statistike
-      echo '<br>Number of users:'`cat $svikorisnici | wc -l` >>$statistike
-      echo '<br>Number of nodes:'$TOTAL_NODE >>$statistike
-      echo '<br>Number of ways:'$TOTAL_WAY >>$statistike
-      echo '<br>Number of relations:'$TOTAL_RELATION >>$statistike
-      echo '<table class="sortable" style="width: 100%; border: 1px solid gray" border=1 width=100%>' >>$statistike
-      echo '<tr><td>User</td><td>Nodes</td><td>%</td><td>Ways</td><td>%</td><td>Relations</td><td>%</td><td>Last edit</td></tr>' >>  $statistike
-      exec 3<"$korstat2"
-      
-      while read <&3 -r LINE
-      do
-        echo "$LINE" | awk -v Node=$TOTAL_NODE -v Way=$TOTAL_WAY -v Relation=$TOTAL_RELATION -F "." '{printf "<tr><td><a href=\"http://osm.org/user/%s\">%s</a>: <a href=\"http://hdyc.neis-one.org/?%s\">h</a>, <a href=\"http://yosmhm.neis-one.org/?%s\">y</a></td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td><td align=\"right\">%3.2f</td><td>%s</td></tr> \n",$1,$1,$1,$1,$2,100*($2)/Node,$3,100*($3)/Way,$4,100*($4)/Relation,$5;}' >>$statistike
-      done
-      exec 3>&-
-      echo '</table></body></html>' >> $statistike
-      
-      #country user stats.htm to web folder
-      cp -p $statistike $WEB/statistics/$drzava-stats.htm
-      mv $statistike $WEB/$drzava/$drzava-stats.htm
-      echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" htm files created and copied to web." >> $LOG
-
-      rm $STATS/$drzava.osm
+    echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" csv files created and copied to web." >> $LOG
     done
+
   fi
   echo `date +%Y-%m-%d\ %H:%M:%S`" - All statistics finished." >> $LOG
 fi
