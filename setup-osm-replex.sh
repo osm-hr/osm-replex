@@ -5,7 +5,7 @@
 #sudo apt-get install zip unzip openjdk-7-jre
 
 ##ubuntu 18.04.1 clean install
-#sudo apt-get install zip unzip openjdk-8-jre zlib1g-dev
+#sudo apt-get install zip unzip openjdk-8-jre zlib1g-dev gdal-bin
 
 REPLEX=/osm/osm-replex
 
