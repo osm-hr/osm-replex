@@ -197,7 +197,8 @@ do
   echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" gpkg export started" >> $LOG
   start_time=`date +%s`
   $OGR2OGR -f GPKG $CACHE/$drzava.gpkg $DATA/$drzava.osm.pbf
-  mv $CACHE/$drzava.gpkg $GIS/
+  zip $CACHE/$drzava.zip $CACHE/$drzava.gpkg
+  mv $CACHE/$drzava.zip $GIS/
   end_time=`date +%s`
   lasted="$(( $end_time - $start_time ))"
   echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" PBF export finished in" $lasted "seconds." >> $LOG
