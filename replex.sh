@@ -26,6 +26,7 @@ STATS=$REPLEX/stats
 WEB=/osm/www-data
 PBF=$WEB/osm
 FLOODS=$WEB/floods
+GIS=$WEB/gis_exports
 #www-tms folders
 TMS=/osm/www-tms
 #aplikacije
@@ -35,6 +36,7 @@ osmfilter=$REPLEX/bin/osmfilter
 MKGMAP=$REPLEX/bin/mkgmap/mkgmap.jar
 SPLITTER=$REPLEX/bin/splitter/splitter.jar
 OSMANDMC=$REPLEX/bin/osmandmc
+OGR2OGR=/usr/bin/ogr2ogr
 #Ram za java aplikacije
 RAM=5G
 #fajlovi
@@ -183,6 +185,28 @@ if [ $hour -eq 00 ]
     done
   fi
 fi
+
+#####################
+## gpkg exporti ##
+#####################
+
+echo `date +%Y-%m-%d\ %H:%M:%S`" - GPKG export starting." >> $LOG
+
+for drzava in albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia 
+do
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" GPKG export started" >> $LOG
+  start_time=`date +%s`
+  $OGR2OGR -f GPKG $CACHE/$drzava.gpkg $DATA/$drzava.osm.pbf
+  zip -m $CACHE/$drzava.gpkg.zip $CACHE/$drzava.gpkg
+  mv $CACHE/$drzava.gpkg.zip $GIS/
+  end_time=`date +%s`
+  lasted="$(( $end_time - $start_time ))"
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" GPKG export finished in" $lasted "seconds." >> $LOG
+done
+
+echo `date +%Y-%m-%d\ %H:%M:%S`" - GPKG export finished." >> $LOG
+
+
 
 ####################
 ## Garmin exporti ##
