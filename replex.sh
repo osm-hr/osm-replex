@@ -263,7 +263,7 @@ if [ $hour -eq 00 ]
  
   #cd $OSMANDMCMC
   #java -Djava.util.logging.config.file=$REPLEX/logging.properties -Xms64M -Xmx$RAM -cp "$OSMANDMC/OsmAndMapCreator.jar:$OSMANDMC/lib/OsmAnd-core.jar:$OSMANDMC/lib/*.jar" net.osmand.data.index.IndexBatchCreator $REPLEX/batch.xml
-  java -Xmx$RAM -cp "$OSMANDMC/OsmAndMapCreator.jar:$OSMANDMC/lib/OsmAnd-core.jar:$OSMANDMC/lib/*.jar" net.osmand.data.index.IndexBatchCreator $REPLEX/osmandmc.xml
+  java -Xmx$RAM -cp "$OSMANDMC/OsmAndMapCreator.jar:$OSMANDMC/lib/OsmAnd-core.jar:$OSMANDMC/lib/*.jar" net.osmand.util.IndexBatchCreator $REPLEX/osmandmc.xml
   mv $DATA/*.obf* $WEB/osmand
 
   end_time=`date +%s`
