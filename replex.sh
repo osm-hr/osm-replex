@@ -5,7 +5,7 @@
 today=$(date +"%Y%m%d")
 yesterday=$(date +"%Y%m%d" --date='yesterday')
 daysago=$(date +"%Y%m%d" --date='2 day ago')
-olddate=$(date +"%Y%m%d" --date='10 days ago')
+olddate=$(date +"%Y%m%d" --date='30 days ago')
 #hour in day, needed for daiyl export vs regular export
 hour=$(date +%H)
 #simulates midnight for testing
