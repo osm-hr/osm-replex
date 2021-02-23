@@ -218,7 +218,7 @@ fi
 
 echo `date +%Y-%m-%d\ %H:%M:%S`" - GPKG export starting." >> $LOG
 
-for drzava in albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia 
+for drzava in croatia 
 do
   echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" GPKG export started" >> $LOG
   start_time=`date +%s`
@@ -229,6 +229,20 @@ do
   lasted="$(( $end_time - $start_time ))"
   echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" GPKG export finished in" $lasted "seconds." >> $LOG
 done
+
+if [ $hour -eq 00 ]; then
+for drzava in albania bosnia-herzegovina bulgaria hungary kosovo macedonia montenegro romania serbia slovenia 
+do
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" GPKG export started" >> $LOG
+  start_time=`date +%s`
+  $OGR2OGR -f GPKG $CACHE/$drzava.gpkg $DATA/$drzava.osm.pbf
+  zip -m -j $CACHE/$drzava.gpkg.zip $CACHE/$drzava.gpkg
+  mv $CACHE/$drzava.gpkg.zip $GIS/
+  end_time=`date +%s`
+  lasted="$(( $end_time - $start_time ))"
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" GPKG export finished in" $lasted "seconds." >> $LOG
+done
+fi
 
 echo `date +%Y-%m-%d\ %H:%M:%S`" - GPKG export finished." >> $LOG
 
