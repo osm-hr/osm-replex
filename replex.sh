@@ -53,7 +53,14 @@ korstat1=$STATS/korisnici_statistike_1.txt
 korstat2=$STATS/korisnici_statistike_2.txt
 statistike=$STATS/statistike.htm
 
-
+#OLDSTATE=state.txt
+OLDTIMESTAMP=$(cat state.txt | grep timestamp | awk -F "=" '{print $2}')
+OLDYEAR=${OLDTIMESTAMP:0:4}
+OLDMONTH=${OLDTIMESTAMP:5:2}
+OLDDAY=${OLDTIMESTAMP:8:2}
+OLDHOUR=${OLDTIMESTAMP:11:2}
+OLDMINUTE=${OLDTIMESTAMP:15:2}
+OLDSECOND=${OLDTIMESTAMP:19:2}
 
 echo "===== Replication S T A R T ====="  >> $LOG
 echo `date +%Y-%m-%d\ %H:%M:%S`" - Starting script" >> $LOG
@@ -66,6 +73,13 @@ start_time0=`date +%s`
 #Downloading changeset and sorting
 echo `date +%Y-%m-%d\ %H:%M:%S`" - Downloading changeset" >> $LOG
 $osmosis --rri workingDirectory=$REPLEX --sort-change --wxc $REPLEX/$CHANGESET
+EXITSTATUS=$?
+echo `date +%Y-%m-%d\ %H:%M:%S`" - Exit state:" $EXITSTATUS >> $LOG
+if [[ $EXITSTATUS -ne 0 ]] ; then
+    echo `date +%Y-%m-%d\ %H:%M:%S`" - Prekidam procesiranje" >> $LOG
+    exit 1
+fi
+
 end_time=`date +%s`
 lasted="$(( $end_time - $start_time0 ))"
 echo `date +%Y-%m-%d\ %H:%M:%S`" - Changeset finished in" $lasted "seconds." >> $LOG
