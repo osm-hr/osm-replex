@@ -165,7 +165,7 @@ echo `date +%Y-%m-%d\ %H:%M:%S`" - Backup finished in" $lasted "seconds." >> $LO
 echo `date +%Y-%m-%d\ %H:%M:%S`" - PBF export starting." >> $LOG
 
 #izvlaci drzavu iz europe ########################
-for drzava in albania bosnia-herzegovina bulgaria croatia hungary kosovo macedonia montenegro romania serbia slovenia 
+for drzava in croatia 
 do
   echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" export started" >> $LOG
   start_time=`date +%s`
@@ -174,6 +174,18 @@ do
   lasted="$(( $end_time - $start_time ))"
   echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" PBF export finished in" $lasted "seconds." >> $LOG
 done
+
+if [ $hour -eq 00 ]; then
+for drzava in albania bosnia-herzegovina bulgaria hungary kosovo macedonia montenegro romania serbia slovenia 
+do
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" export started" >> $LOG
+  start_time=`date +%s`
+  $osmosis --read-pbf file="$EUROPE/europe-east.osm.pbf" --bounding-polygon clipIncompleteEntities="true" file="$POLY/$drzava.poly" --write-pbf   file="$DATA/$drzava.osm.pbf"; cp -p $DATA/$drzava.osm.pbf $PBF/$drzava.osm.pbf
+  end_time=`date +%s`
+  lasted="$(( $end_time - $start_time ))"
+  echo `date +%Y-%m-%d\ %H:%M:%S`" - "$drzava" PBF export finished in" $lasted "seconds." >> $LOG
+done
+fi
 
 echo `date +%Y-%m-%d\ %H:%M:%S`" - PBF export finished." >> $LOG
 
